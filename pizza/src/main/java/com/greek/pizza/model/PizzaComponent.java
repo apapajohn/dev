@@ -6,14 +6,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-public class Topping {
+public class PizzaComponent {
 	
 	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Integer id;
 	private String name;
 	private int quantity;
+	private PizzaComponentType type;
 	
-	@GeneratedValue(strategy=GenerationType.AUTO)
 	public Integer getId() {
 		return id;
 	}
@@ -32,10 +33,19 @@ public class Topping {
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
 	}
+	
+	
+	public PizzaComponentType getType() {
+		return type;
+	}
+	public void setType(PizzaComponentType type) {
+		this.type = type;
+	}
 	@Override
 	public String toString() {
-		return "Topping [id=" + id + ", name=" + name + ", quantity=" + quantity + "]";
+		return "PizzaComponent [id=" + id + ", name=" + name + ", quantity=" + quantity + ", type=" + type + "]";
 	}
+	
 	
 	
 }
