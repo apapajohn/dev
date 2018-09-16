@@ -456,11 +456,15 @@ var OrdersComponent = /** @class */ (function () {
     OrdersComponent.prototype.placeOrder = function () {
         var _this = this;
         this.ordersService.placeOrder().subscribe(function (or) {
-            if (true) {
+            if (or.success == true) {
                 _this.messageService.add("Order placed. Pick up in " + or.pickUpInMinutes + " minutes");
-                _this.reinit();
-                _this.ordersService.clearToppings();
             }
+            else {
+                //todo, better messaging needed.
+                _this.messageService.add(or.orderStatus.status);
+            }
+            _this.reinit();
+            _this.ordersService.clearToppings();
         });
     };
     OrdersComponent = __decorate([

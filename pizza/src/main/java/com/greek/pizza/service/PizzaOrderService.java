@@ -67,36 +67,39 @@ public class PizzaOrderService {
 
 	//@Transactional  TODO: why isn't this annotation working?
 	private OrderResponse transactionalOp(PizzaOrder order) {
-		TransactionStatus td = transactionManager.getTransaction(transactionDefinition);
-		for (PizzaComponent topping : order.getToppings()) {
-			//according to spring doc, this should have pessimistic locking,
-			//because there is an @Version annotation in PizzaComponentRepo
-
-			// TODO: throw a better exception? Runtime exception to trigger rollback
-			PizzaComponent top = pizzaComponentRepo.findById(topping.getId())
-					.orElseThrow(() -> new RuntimeException(
-					"Missing ingredient. Inventory may have been updated while the user was ordering."));
-
-			if (top.getQuantity() > 0) {
-				top.decrementQuantity();
-				pizzaComponentRepo.save(top);
-			} else {
-				 //runtime exception to roll back any prior updates
-				return OrderResponse.getFailedOrderRepsonse("Out of " + top.getName());
-			}
-		}
-
-		PizzaOrderPers orderToPersist = mapToPersistObject(order);
+		TransactionStatus ts = transactionManager.getTransaction(transactionDefinition);
 		try {
+			for (PizzaComponent topping : order.getToppings()) {
+				// according to spring doc, this should have pessimistic locking,
+				// because there is an @Version annotation in PizzaComponentRepo
+
+				PizzaComponent top = pizzaComponentRepo.findById(topping.getId())
+						.orElseThrow(() -> new RuntimeException(
+								"Missing ingredient. Inventory may have been updated while the user was ordering."));
+
+				if (top.getQuantity() > 0) {
+					top.decrementQuantity();
+					pizzaComponentRepo.save(top);
+				} else {
+					transactionManager.rollback(ts);
+
+					return OrderResponse.getFailedOrderRepsonse("Out of " + top.getName());
+				}
+			}
+
+			PizzaOrderPers orderToPersist = mapToPersistObject(order);
 			orderRepo.save(orderToPersist);
+
+			transactionManager.commit(ts);
+			
+			return OrderResponse.getSuccessfulOrderResponse(DEFAULT_PICKUP_TIME);
+			
 		} catch (RuntimeException r) {
-		
-			logger.error("Server error",r);
+			transactionManager.rollback(ts);
+			logger.error("Server error", r);
 			return OrderResponse.getFailedOrderRepsonse("Server error");
-		} 
-		transactionManager.commit(td);
-		return OrderResponse.getSuccessfulOrderResponse(DEFAULT_PICKUP_TIME);
 		
+		}
 	}
 
 	private PizzaOrderPers mapToPersistObject(PizzaOrder order) {
