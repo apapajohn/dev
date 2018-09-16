@@ -271,7 +271,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _messages_service__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./messages.service */ "./src/app/messages.service.ts");
 /* harmony import */ var _orders_order__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./orders/order */ "./src/app/orders/order.ts");
 /* harmony import */ var _tally_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tally.service */ "./src/app/tally.service.ts");
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/common/http */ "./node_modules/@angular/common/fesm5/http.js");
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -285,17 +286,19 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 
 
 
+
 var OrdersService = /** @class */ (function () {
-    function OrdersService(messageService, tallyService) {
+    function OrdersService(messageService, tallyService, http) {
         this.messageService = messageService;
         this.tallyService = tallyService;
+        this.http = http;
+        this.NEW_ORDER_PATH = "/order";
         //A service should be stateless, but I need a way to communicate
         //the order information across components. This is similar to messageService in that way.
         this.order = new _orders_order__WEBPACK_IMPORTED_MODULE_1__["Order"]();
     }
     OrdersService.prototype.placeOrder = function () {
-        //todo create a price-calculator service that gets the 
-        //total from the server
+        return this.http.post(this.NEW_ORDER_PATH, this.order);
     };
     OrdersService.prototype.isOkToPlaceOrder = function () {
         return this.order.isComplete();
@@ -305,7 +308,7 @@ var OrdersService = /** @class */ (function () {
     };
     OrdersService.prototype.addTopping = function (topping) {
         this.order.addTopping(topping);
-        this.order.total = this.tallyService.getTotal(this.order);
+        this.order.totalInCents = this.tallyService.getTotalInCents(this.order);
     };
     OrdersService.prototype.clearToppings = function () {
         this.order.clearToppings();
@@ -317,13 +320,15 @@ var OrdersService = /** @class */ (function () {
         this.order.customerFirstName = orderForm.customerFirstName;
     };
     OrdersService.prototype.getOrderTotal = function () {
-        return this.order.total;
+        return this.order.totalInCents;
     };
     OrdersService = __decorate([
-        Object(_angular_core__WEBPACK_IMPORTED_MODULE_3__["Injectable"])({
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_4__["Injectable"])({
             providedIn: 'root'
         }),
-        __metadata("design:paramtypes", [_messages_service__WEBPACK_IMPORTED_MODULE_0__["MessageService"], _tally_service__WEBPACK_IMPORTED_MODULE_2__["TallyService"]])
+        __metadata("design:paramtypes", [_messages_service__WEBPACK_IMPORTED_MODULE_0__["MessageService"],
+            _tally_service__WEBPACK_IMPORTED_MODULE_2__["TallyService"],
+            _angular_common_http__WEBPACK_IMPORTED_MODULE_3__["HttpClient"]])
     ], OrdersService);
     return OrdersService;
 }());
@@ -408,8 +413,9 @@ module.exports = "\r\n  \r\n<div  *ngIf=\"isOkToShowOrder()\">\r\n<P>\r\n<h2>Ord
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "OrdersComponent", function() { return OrdersComponent; });
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
-/* harmony import */ var _orders_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../orders.service */ "./src/app/orders.service.ts");
+/* harmony import */ var _messages_service__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../messages.service */ "./src/app/messages.service.ts");
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+/* harmony import */ var _orders_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../orders.service */ "./src/app/orders.service.ts");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -421,15 +427,20 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 };
 
 
+
 var OrdersComponent = /** @class */ (function () {
-    function OrdersComponent(ordersService) {
+    function OrdersComponent(ordersService, messageService) {
         this.ordersService = ordersService;
+        this.messageService = messageService;
         this.orderForm = { customerFirstName: '' };
     }
     OrdersComponent.prototype.ngOnInit = function () {
     };
     OrdersComponent.prototype.ngOnChanges = function (changes) {
         this.ordersService.updateOrder(this.orderForm);
+    };
+    OrdersComponent.prototype.reinit = function () {
+        this.orderForm = { customerFirstName: '' };
     };
     OrdersComponent.prototype.isOkToShowOrder = function () {
         return this.ordersService.isOkToShowOrder();
@@ -443,15 +454,23 @@ var OrdersComponent = /** @class */ (function () {
         return this.ordersService.isOkToPlaceOrder();
     };
     OrdersComponent.prototype.placeOrder = function () {
-        this.ordersService.placeOrder();
+        var _this = this;
+        this.ordersService.placeOrder().subscribe(function (or) {
+            if (true) {
+                _this.messageService.add("Order placed. Pick up in " + or.pickUpInMinutes + " minutes");
+                _this.reinit();
+                _this.ordersService.clearToppings();
+            }
+        });
     };
     OrdersComponent = __decorate([
-        Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Component"])({
             selector: 'app-orders',
             template: __webpack_require__(/*! ./orders.component.html */ "./src/app/orders/orders.component.html"),
             styles: [__webpack_require__(/*! ./orders.component.css */ "./src/app/orders/orders.component.css")]
         }),
-        __metadata("design:paramtypes", [_orders_service__WEBPACK_IMPORTED_MODULE_1__["OrdersService"]])
+        __metadata("design:paramtypes", [_orders_service__WEBPACK_IMPORTED_MODULE_2__["OrdersService"],
+            _messages_service__WEBPACK_IMPORTED_MODULE_0__["MessageService"]])
     ], OrdersComponent);
     return OrdersComponent;
 }());
@@ -585,9 +604,9 @@ var TallyService = /** @class */ (function () {
     function TallyService() {
     }
     //TODO: hit http service
-    TallyService.prototype.getTotal = function (order) {
+    TallyService.prototype.getTotalInCents = function (order) {
         //mock func:
-        return order.toppings.length * 1.50;
+        return order.toppings.length * 150;
     };
     TallyService = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"])({
@@ -631,9 +650,10 @@ var ToppingService = /** @class */ (function () {
     function ToppingService(http, messageService) {
         this.http = http;
         this.messageService = messageService;
+        this.TOPPINGS_PATH = "/toppings";
     }
     ToppingService.prototype.getToppings = function () {
-        return this.http.get("http://localhost:9633/toppings");
+        return this.http.get(this.TOPPINGS_PATH);
     };
     ToppingService = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Injectable"])({

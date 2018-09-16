@@ -5,6 +5,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.springframework.data.annotation.Version;
+/**
+ * Things that make up a pizza: i.e., toppings
+ * 
+ * As more types are added, consider pulling this up into an interface
+ */
+//TODO: neeeds validation
 @Entity
 public class PizzaComponent {
 	
@@ -12,7 +19,16 @@ public class PizzaComponent {
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Integer id;
 	private String name;
+	
+	@Version
+	private Integer version;
+	/**
+	 * How many are in stock
+	 */
 	private int quantity;
+	/**
+	 * Perhaps TOPPING or CHEESE 
+	 */
 	private PizzaComponentType type;
 	
 	public Integer getId() {
@@ -41,9 +57,23 @@ public class PizzaComponent {
 	public void setType(PizzaComponentType type) {
 		this.type = type;
 	}
+	
+	
+	public Integer getVersion() {
+		return version;
+	}
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+	
+	public void decrementQuantity() {
+		--quantity;
+		
+	}
 	@Override
 	public String toString() {
-		return "PizzaComponent [id=" + id + ", name=" + name + ", quantity=" + quantity + ", type=" + type + "]";
+		return "PizzaComponent [id=" + id + ", name=" + name + ", quantity=" + quantity
+				+ ", type=" + type + "]";
 	}
 	
 	

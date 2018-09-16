@@ -20,9 +20,10 @@ public class ToppingResource {
 	PizzaComponentRepo toppingRepo;
 	
 	 @RequestMapping(value="/toppings")
-	
+	 
 	public ResponseEntity<List<PizzaComponent>> toppings() {
-		return ResponseEntity.ok().header("Access-Control-Allow-Origin", "*")
+	
+		 return ResponseEntity.ok()
 				.body(
 						StreamSupport.stream(toppingRepo.findAll().spliterator(), false)
 							.filter(pc -> pc.getType().equals(TOPPING))
