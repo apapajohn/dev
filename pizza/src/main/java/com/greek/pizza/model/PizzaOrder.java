@@ -48,9 +48,7 @@ public class PizzaOrder {
 				} else {
 					toppingCounts.put(n,1);
 				}
-				
-				
-		});
+			});
 		
 		return toppingCounts.entrySet().stream()
 			.map(e -> e.getKey() + " count:  " + e.getValue())

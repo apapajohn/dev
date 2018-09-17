@@ -1,5 +1,9 @@
 package com.greek.pizza.model;
 
+/**
+ * Message back to the front end about the status of the pizza order
+ *
+ */
 public class OrderResponse {
 	private String orderStatus;
 	private boolean success;

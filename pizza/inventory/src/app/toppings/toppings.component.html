@@ -1,0 +1,13 @@
+  <div>
+ {{message}}<P>
+    <label>name:
+      <input [(ngModel)]="formTopping.name" placeholder="name">
+      
+      </label><P>
+      <label>quantity
+      <input [(ngModel)]="formTopping.quantity" placeholder="quantity">
+      </label>
+ <div *ngIf="formTopping.name != ''">
+	<button (click)="saveTopping()">Save topping</button>
+</div>
+</div>

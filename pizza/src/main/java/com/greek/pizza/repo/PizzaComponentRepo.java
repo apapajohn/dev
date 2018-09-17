@@ -7,4 +7,5 @@ import com.greek.pizza.model.PizzaComponent;
 @RepositoryRestResource(collectionResourceRel = "pizzacomponent", path = "pizzacomponent")
 public interface PizzaComponentRepo extends CrudRepository<PizzaComponent, Integer>{
 
+
 }
