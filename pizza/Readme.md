@@ -47,19 +47,19 @@ Customize the inventory
 
 
 ### Assumptions:
-Managers can customize quantity and type of topping.
-Customers can add a topping more than once (for extra)
-Managers need to authenticate securely
-Requirements specify one pizza, but it will be desirable in the future for customers to order more than one pizza at a time.
+- Managers can customize quantity and type of topping.
+- Customers can add a topping more than once (for extra)
+- Managers need to authenticate securely
+- Requirements specify one pizza, but it will be desirable in the future for customers to order more than one pizza at a time.
 
 ### Architecture decisions:
 
-The transactional nature of the data calls for a relational database.
-Using Spring because it's convenient for its web capabilities, such as security, JPA and transactions, and later can be helpful for adding services, caching
+- The transactional nature of the data calls for a relational database.
+- Using Spring because it's convenient for its web capabilities, such as security, JPA and transactions, and later can be helpful for adding services, caching
  caching, or user sessions if future functionality requires it.
-Angular to isolate the UI from the back end to support extending the site for additional functionality such as advertising custom offers
-Due to budget constraints:
-Monolithic MVC architecture
-For speed of development, using an embedded sql database. Should eventually be replaced with an external db such as MySql
+- Angular to isolate the UI from the back end to support extending the site for additional functionality such as advertising custom offers
+- Due to budget constraints:
+- Monolithic MVC architecture
+- For speed of development, using an embedded sql database. Should eventually be replaced with an external db such as MySql
 
 
